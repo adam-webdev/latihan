@@ -16,11 +16,32 @@ mongoose.connection.on("err mongoose", (err) => {
 });
 
 require("./models/user");
-// require("./models/post");
+require("./models/news");
+require("./models/product");
+require("./models/producerprice");
+require("./models/directory");
+require("./models/pestmanagement");
+require("./models/plantingguide");
+require("./models/discussion");
+require("./models/complain");
+require("./models/plant");
+require("./models/erdkk");
+require("./models/field");
 
 app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/user"));
+app.use(require("./routes/news"));
+app.use(require("./routes/product"));
+app.use(require("./routes/producerprice"));
+app.use(require("./routes/directory"));
+app.use(require("./routes/pestmanagement"));
+app.use(require("./routes/plantingguide"));
+app.use(require("./routes/discussion"));
+app.use(require("./routes/complain"));
+app.use(require("./routes/plant"));
+app.use(require("./routes/erdkk"));
+app.use(require("./routes/field"));
 // app.use(require("./routes/post"));
 
 app.listen(PORT, () => {
