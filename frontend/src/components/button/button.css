@@ -1,0 +1,118 @@
+.button-edit{
+  background-color: grey;
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  padding: 10px;
+  margin-right: 6px;
+}
+.button-edit:hover{
+  background-color: rgb(100, 100, 100);
+}
+.link-button-edit,
+.link-button-create,
+.link-button-comment,
+.link-button-view {
+  text-decoration: none;
+}
+
+.button-create{
+  width: 140px;
+  box-sizing: border-box;
+  padding: 2px 8px;
+  background-color: rgb(74, 173, 107);
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+.button-create:hover{
+  background-color: rgb(62, 155, 78);
+}
+
+.button-comment{
+  box-sizing: border-box;
+  padding: 10px;
+  background-color: rgb(12, 97, 255);
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  margin-right: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.button-comment:hover{
+  background-color: rgb(26, 88, 202);
+}
+
+.button-view{
+  box-sizing: border-box;
+  padding: 10px;
+  background-color: rgb(12, 97, 255);
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  margin-right: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.button-view:hover{
+  background-color:  rgb(26, 88, 202);
+}
+
+.button-delete{
+  background-color: rgb(255, 55, 55);
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px;
+}
+.button-delete:hover{
+  background-color: rgb(207, 42, 42);
+}
+
+.button-update{
+  width: 140px;
+  box-sizing: border-box;
+  padding: 2px 8px;
+  background-color: rgb(74, 173, 107);
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 30px;
+}
+.button-update:hover{
+  background-color: rgb(62, 155, 78);
+}
+
+.button-status{
+  width: 140px;
+  box-sizing: border-box;
+  padding: 2px 8px;
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+ .blue{
+  background-color: rgb(12, 97, 255);
+}
+ .green{
+  background-color: rgb(74, 173, 107);
+
+}
+.red{
+  background-color: rgb(255, 55, 55);
+}
+
+
+

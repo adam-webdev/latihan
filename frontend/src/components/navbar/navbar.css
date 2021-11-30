@@ -1,0 +1,25 @@
+.nav-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+  padding: 10px 30px;
+  background-color: #fff;
+  border-bottom: 1px solid rgb(243, 243, 243);
+}
+.nav-container .nav-logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+}
+.nav-container .nav-logo h2{
+  font-size: 16px;
+  font-weight: 400;
+  color: grey;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.nav-container p{
+  font-size: 16px;
+}

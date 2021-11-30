@@ -1,0 +1,36 @@
+.wrapp-home{
+
+}
+
+
+.icons-home{
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
+}
+.card{
+  margin: 30px;
+  background-color: #fff;
+  box-shadow: 0 2px 2px rgb(0 0 0 /10%);
+}
+.card .row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card .row .link-home{
+  display: flex;
+  text-decoration: none;
+  align-items: center;
+  padding: 10px;
+  width: 50%;
+  color: grey;
+  border: 1px solid rgb(233, 232, 232);
+}
+.card .row .link-home:hover{
+  color: rgb(39, 39, 250);
+}
+.card .row p{
+  font-size: 18px;
+  font-weight: 600;
+}
