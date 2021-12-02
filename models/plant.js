@@ -31,9 +31,12 @@ const plantSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    plant_picturePath: {
+    picture: {
       type: String,
       required: true,
+    },
+    cloudinary_id: {
+      type: String,
     },
   },
   { timestamps: true }

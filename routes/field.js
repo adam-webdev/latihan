@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const Field = mongoose.model("Field");
-
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 // find all
 router.get("/api/field", auth, (req, res) => {
   Field.find()

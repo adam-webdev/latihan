@@ -3,7 +3,10 @@ const app = express();
 const mongoose = require("mongoose");
 const PORT = 4000;
 const { MONGO_URI } = require("./key.js");
+const cors = require("cors");
+const dotenv = require("dotenv");
 
+dotenv.config();
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -28,6 +31,7 @@ require("./models/plant");
 require("./models/erdkk");
 require("./models/field");
 
+app.use(cors());
 app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/user"));

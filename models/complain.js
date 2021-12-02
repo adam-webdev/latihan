@@ -15,13 +15,16 @@ const complainSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    complain_piturePath: {
+    picture: {
       type: String,
       required: true,
     },
     status: {
       type: String,
       required: true,
+    },
+    cloudinary_id: {
+      type: String,
     },
   },
   { timestamps: true }

@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const product = mongoose.model("Product");
-
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 // find all
 router.get("/api/product", auth, (req, res) => {
   product
@@ -16,42 +17,32 @@ router.get("/api/product", auth, (req, res) => {
     });
 });
 // create
-router.post("/api/product", auth, (req, res) => {
-  const {
-    category,
-    price,
-    commodity,
-    description,
-    stock_kg,
-    product_picturePath,
-  } = req.body;
-  if (
-    !category ||
-    !price ||
-    !commodity ||
-    !description ||
-    !stock_kg ||
-    !product_picturePath
-  ) {
-    res.status(404).json({ message: "semua input harus diisi" });
-  }
-  const products = new product({
-    user_id: req.user,
-    category,
-    price,
-    commodity,
-    description,
-    stock_kg,
-    product_picturePath,
-  });
-
-  products
-    .save()
+router.post("/api/product", [upload.single("picture"), auth], (req, res) => {
+  cloudinary.uploader
+    .upload(req.file.path)
     .then((result) => {
-      res.status(201).json({ message: "product berhasil disimpan" });
+      const { price, description, category, commodity, stock_kg } = req.body;
+      const product = new Product({
+        price,
+        user_id: req.user,
+        description,
+        category,
+        commodity,
+        stock_kg,
+        picture: result.secure_url,
+        cloudinary_id: result.public_id,
+      });
+      product
+        .save()
+        .then((product) => {
+          res.status(201).json({ message: "product berhasil disimpan" });
+        })
+        .catch((err) => {
+          res.status(404).json({ message: err });
+        });
     })
     .catch((err) => {
-      res.status(404).json({ message: err });
+      res.status(401).json({ message: err });
     });
 });
 
@@ -66,36 +57,51 @@ router.get("/api/product/:id", auth, (req, res) => {
 });
 
 //update
-router.put("/api/product/:id", auth, (req, res) => {
-  const {
-    category,
-    price,
-    commodity,
-    description,
-    stock_kg,
-    product_picturePath,
-  } = req.body;
-  if (
-    !category ||
-    !price ||
-    !commodity ||
-    !description ||
-    !stock_kg ||
-    !product_picturePath
-  ) {
-    res.status(404).json({ message: "semua input harus diisi" });
-  }
+router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
+  Product.findById(req.params.id)
+    .then((product) => {
+      res.json(product);
 
-  product
-    .findByIdAndUpdate(req.params.id, req.body, { new: true })
-    .then((data) => {
-      if (!data) {
-        res.status(400).json({ message: "Product tidak ditemukan" });
+      cloudinary.uploader.destroy(product.cloudinary_id);
+      //jika ada request file
+      if (req.file) {
+        cloudinary.uploader
+          .upload(req.file.path)
+          .then((result) => {
+            const data = {
+              category: req.body.name || product.name,
+              price: req.body.email || product.email,
+              commodity: req.body.address || product.address,
+              description: req.body.role || product.role,
+              stock_kg: req.body.gapoktan || product.gapoktan,
+              picture: result?.secure_url || product.picture,
+              cloudinary_id: result?.public_id || product.cloudinary_id,
+            };
+
+            Product.findByIdAndUpdate(req.params.id, data, { new: true })
+              .then((res) => {
+                res.json({ message: "Berhasil update", res });
+              })
+              .catch((err) => {
+                res.json({ message: err });
+              });
+          })
+          .catch((err) => {
+            res.json({ message: err });
+          });
+        // jika tidak ada request file
+      } else {
+        Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+          .then((res) => {
+            res.json({ message: "Berhasil update", res });
+          })
+          .catch((err) => {
+            res.json({ message: err });
+          });
       }
-      res.status(200).json({ message: "Product berhasil diupdate", data });
     })
     .catch((err) => {
-      res.status(400).json({ message: "Product tidak ditemukan", error: err });
+      res.json({ message: err });
     });
 });
 
@@ -103,6 +109,7 @@ router.put("/api/product/:id", auth, (req, res) => {
 router.delete("/api/product/:id", auth, (req, res) => {
   product.findByIdAndRemove({ _id: req.params.id }).exec((err, product) => {
     if (product) {
+      cloudinary.uploader.destroy(product.cloudinary_id);
       return res.status(200).json({ message: "Berhasil dihapus" });
     }
     res.send(404).json({ error: "Product tidak ditemukan" });

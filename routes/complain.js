@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const Complain = mongoose.model("Complain");
-
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 // find all
 router.get("/api/complain", auth, (req, res) => {
   Complain.find()
@@ -15,23 +16,26 @@ router.get("/api/complain", auth, (req, res) => {
     });
 });
 // create
-router.post("/api/complain", auth, (req, res) => {
-  const { locationDetail, description, complain_piturePath, status } = req.body;
-  if (!locationDetail || !description || !status || !complain_piturePath) {
-    res.status(404).json({ message: "semua input harus diisi" });
-  }
-  const complains = new Complain({
-    user_id: req.user,
-    locationDetail,
-    description,
-    status,
-    complain_picturePath,
-  });
-
-  complains
-    .save()
+router.post("/api/complain", [upload.single("picture"), auth], (req, res) => {
+  cloudinary.uploader
+    .upload(req.file.path)
     .then((result) => {
-      res.status(201).json({ message: "complain berhasil disimpan" });
+      const { locationDetail, description, status } = req.body;
+      const complain = new Complain({
+        locationDetail,
+        status,
+        description,
+        picture: result.secure_url,
+        cloudinary_id: result.public_id,
+      });
+      complain
+        .save()
+        .then((complain) => {
+          res.status(201).json({ message: "complain berhasil disimpan" });
+        })
+        .catch((err) => {
+          res.status(404).json({ message: err });
+        });
     })
     .catch((err) => {
       res.status(404).json({ message: err });
@@ -40,32 +44,73 @@ router.post("/api/complain", auth, (req, res) => {
 
 // find one detail
 router.get("/api/complain/:id", auth, (req, res) => {
-  complain.findOne({ _id: req.params.id }).exec((err, complain) => {
+  Complain.findOne({ _id: req.params.id }).exec((err, complain) => {
     if (err || !complain) {
-      res.status(404).json({ message: err, error: true });
+      res.status(404).json({ message: "Tidak ditemukan", error: true });
     }
     res.status(200).json({ error: false, message: "success", complain });
   });
 });
 
 //update
-router.put("/api/complain/:id", auth, (req, res) => {
-  Complain.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    .then((data) => {
-      if (!data) {
-        res.status(400).json({ message: "complain tidak ditemukan" });
-      }
-      res.status(200).json({ message: "complain berhasil diupdate", data });
-    })
-    .catch((err) => {
-      res.status(400).json({ message: "complain tidak ditemukan", error: err });
-    });
-});
+router.put(
+  "/api/complain/:id",
+  [upload.single("picture"), auth],
+  (req, res) => {
+    Complain.findById(req.params.id)
+      .then((complain) => {
+        cloudinary.uploader.destroy(complain.cloudinary_id);
+        //jika ada request file
+        if (req.file) {
+          cloudinary.uploader
+            .upload(req.file.path)
+            .then((result) => {
+              const data = {
+                locationDetail:
+                  req.body.locationDetail || complain.locationDetail,
+                status: req.body.status || complain.status,
+                description: req.body.description || complain.description,
+                picture: result?.secure_url || complain.picture,
+                cloudinary_id: result?.public_id || complain.cloudinary_id,
+              };
+
+              Complain.findByIdAndUpdate(req.params.id, data, {
+                new: true,
+              })
+                .then((res) => {
+                  res.json({ message: "Berhasil update", res });
+                })
+                .catch((err) => {
+                  res.json({ message: err });
+                });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+          // jika tidak ada request file
+        } else {
+          Complain.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+          })
+            .then((res) => {
+              res.json({ message: "Berhasil update", res });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+        }
+      })
+      .catch((err) => {
+        res.json({ message: err });
+      });
+  }
+);
 
 //delete
 router.delete("/api/complain/:id", auth, (req, res) => {
   Complain.findByIdAndRemove({ _id: req.params.id }).exec((err, complain) => {
     if (complain) {
+      cloudinary.uploader.destroy(complain.cloudinary_id);
       return res.status(200).json({ message: "Berhasil dihapus" });
     }
     res.send(404).json({ error: "complain tidak ditemukan" });

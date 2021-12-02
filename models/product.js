@@ -27,9 +27,12 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    product_picturePath: {
+    picture: {
       type: String,
       required: true,
+    },
+    cloudinary_id: {
+      type: String,
     },
   },
   { timestamps: true }

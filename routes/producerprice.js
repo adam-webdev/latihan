@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const Producerprice = mongoose.model("Producerprice");
-
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 // find all
 router.get("/api/producerprice", auth, (req, res) => {
   Producerprice.find()
@@ -15,26 +16,36 @@ router.get("/api/producerprice", auth, (req, res) => {
     });
 });
 // create
-router.post("/api/producerprice", auth, (req, res) => {
-  const { comodityName, price, picture } = req.body;
-  if (!comodityName || !price || !picture) {
-    res.status(404).json({ message: "semua input harus diisi" });
+router.post(
+  "/api/producerprice",
+  [upload.single("picture"), auth],
+  (req, res) => {
+    cloudinary.uploader
+      .upload(req.file.path)
+      .then((result) => {
+        const { price, comodityName } = req.body;
+        const producerprice = new Producerprice({
+          price,
+          comodityName,
+          picture: result.secure_url,
+          cloudinary_id: result.public_id,
+        });
+        producerprice
+          .save()
+          .then((producerprice) => {
+            res
+              .status(201)
+              .json({ message: "Producerprice berhasil disimpan" });
+          })
+          .catch((err) => {
+            res.status(404).json({ message: err });
+          });
+      })
+      .catch((err) => {
+        res.status(401).json({ message: err });
+      });
   }
-  const producerprice = new Producerprice({
-    comodityName,
-    price,
-    picture,
-  });
-
-  producerprice
-    .save()
-    .then((result) => {
-      res.status(201).json({ message: "producerprice berhasil disimpan" });
-    })
-    .catch((err) => {
-      res.status(404).json({ message: err });
-    });
-});
+);
 
 // find one detail
 router.get("/api/producerprice/:id", auth, (req, res) => {
@@ -49,32 +60,65 @@ router.get("/api/producerprice/:id", auth, (req, res) => {
 });
 
 //update
-router.put("/api/producerprice/:id", auth, (req, res) => {
-  const { comodityName, price, picture } = req.body;
-  if (!comodityName || !price || !picture) {
-    res.status(404).json({ message: "semua input harus diisi" });
+router.put(
+  "/api/producerprice/:id",
+  [upload.single("picture"), auth],
+  (req, res) => {
+    Producerprice.findById(req.params.id)
+      .then((producerprice) => {
+        cloudinary.uploader.destroy(producerprice.cloudinary_id);
+        //jika ada request file
+        if (req.file) {
+          cloudinary.uploader
+            .upload(req.file.path)
+            .then((result) => {
+              const data = {
+                price: req.body.price || producerprice.price,
+                comodityName:
+                  req.body.comodityName || producerprice.comodityName,
+                picture: result?.secure_url || producerprice.picture,
+                cloudinary_id: result?.public_id || producerprice.cloudinary_id,
+              };
+
+              Producerprice.findByIdAndUpdate(req.params.id, data, {
+                new: true,
+              })
+                .then((res) => {
+                  res.json({ message: "Berhasil update", res });
+                })
+                .catch((err) => {
+                  res.json({ message: err });
+                });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+          // jika tidak ada request file
+        } else {
+          Producerprice.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+          })
+            .then((res) => {
+              res.json({ message: "Berhasil update", res });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+        }
+      })
+      .catch((err) => {
+        res.json({ message: err });
+      });
   }
-  Producerprice.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    .then((data) => {
-      if (!data) {
-        res.status(400).json({ message: "Producer Price tidak ditemukan" });
-      }
-      res
-        .status(200)
-        .json({ message: "Producer Price berhasil diupdate", data });
-    })
-    .catch((err) => {
-      res
-        .status(400)
-        .json({ message: "Producer Price tidak ditemukan", error: err });
-    });
-});
+);
 
 //delete
 router.delete("/api/producerprice/:id", auth, (req, res) => {
   Producerprice.findByIdAndRemove({ _id: req.params.id }).exec(
     (err, producerprice) => {
       if (producerprice) {
+        cloudinary.uploader.destroy(producerprice.cloudinary_id);
+
         return res.status(200).json({ message: "Berhasil dihapus" });
       }
       res.send(404).json({ error: "Producer Price tidak ditemukan" });

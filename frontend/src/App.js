@@ -1,6 +1,6 @@
 import "./App.css";
 import Navbar from "./components/navbar/Navbar";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Home from "./components/home/Home";
 import User from "./components/user/User";
 import UpdateUser from "./components/user/UpdateUser";
@@ -32,62 +32,83 @@ import PlantingGuide from "./components/planting-guide/PlantingGuide";
 import Field from "./components/field/Field";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
+import { UserInfo, UserContext } from "./context/UserContext";
+import { useEffect, useContext } from "react";
 
-const Routing = () => (
-  <Routes>
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route exact path="home" element={<Home />} />
-    <Route path="/user" element={<User />} />
-    <Route path="/user/1/edit" element={<UpdateUser />} />
-    {/* news */}
-    <Route path="/news" element={<News />} />
-    <Route path="/news/1/edit" element={<UpdateNews />} />
-    <Route path="/news/create" element={<CreateNews />} />
+const Routing = () => {
+  const navigate = useNavigate();
+  const { state, dispatch } = useContext(UserInfo);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      dispatch({ type: "USER_INFO", payload: user });
+    } else {
+      navigate("/login");
+    }
+  }, []);
 
-    {/* product */}
-    <Route path="/product" element={<Product />} />
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route exact path="/home" element={<Home />} />
+      <Route path="/user" element={<User />} />
+      <Route path="/user/:id/edit" element={<UpdateUser />} />
+      {/* news */}
+      <Route path="/news" element={<News />} />
+      <Route path="/news/:id/edit" element={<UpdateNews />} />
+      <Route path="/news/create" element={<CreateNews />} />
 
-    {/* discussion */}
-    <Route path="/discussion" element={<Discussion />} />
-    <Route path="/discussion/create" element={<CreateDiscussion />} />
-    <Route path="/discussion/1/comment" element={<Comment />} />
+      {/* product */}
+      <Route path="/product" element={<Product />} />
 
-    {/* producer price */}
-    <Route path="/producer-price" element={<ProductPrice />} />
-    <Route path="/producer-price/1/edit" element={<UpdateProducerPrice />} />
-    <Route path="/producer-price/create" element={<CreateProducerPrice />} />
+      {/* discussion */}
+      <Route path="/discussion" element={<Discussion />} />
+      <Route path="/discussion/create" element={<CreateDiscussion />} />
+      <Route path="/discussion/1/comment" element={<Comment />} />
 
-    {/* directory */}
-    <Route path="/directory" element={<Directory />} />
-    <Route path="/directory/1/edit" element={<UpdateDirectory />} />
-    <Route path="/directory/create" element={<CreateDirectory />} />
+      {/* producer price */}
+      <Route path="/producer-price" element={<ProductPrice />} />
+      <Route path="/producer-price/1/edit" element={<UpdateProducerPrice />} />
+      <Route path="/producer-price/create" element={<CreateProducerPrice />} />
 
-    {/* complain */}
-    <Route path="/complain" element={<Complain />} />
-    <Route path="/complain/1/view" element={<ViewComplain />} />
+      {/* directory */}
+      <Route path="/directory" element={<Directory />} />
+      <Route path="/directory/1/edit" element={<UpdateDirectory />} />
+      <Route path="/directory/create" element={<CreateDirectory />} />
 
-    {/* pest-management */}
-    <Route path="/pest-management" element={<PestManagement />} />
-    <Route path="/pest-management/1/edit" element={<UpdatePestManagement />} />
-    <Route path="/pest-management/create" element={<CreatePestManagement />} />
+      {/* complain */}
+      <Route path="/complain" element={<Complain />} />
+      <Route path="/complain/1/view" element={<ViewComplain />} />
 
-    {/* plant */}
-    <Route path="/plaint" element={<Plant />} />
+      {/* pest-management */}
+      <Route path="/pest-management" element={<PestManagement />} />
+      <Route
+        path="/pest-management/1/edit"
+        element={<UpdatePestManagement />}
+      />
+      <Route
+        path="/pest-management/create"
+        element={<CreatePestManagement />}
+      />
 
-    {/* Erdkk */}
-    <Route path="/erdkk" element={<Erdkk />} />
-    <Route path="/erdkk/1/view" element={<ViewErdkk />} />
+      {/* plant */}
+      <Route path="/plaint" element={<Plant />} />
 
-    {/* planting guide */}
-    <Route path="/planning-guide" element={<PlantingGuide />} />
-    <Route path="/planning-guide/1/edit" element={<UpdatePlantingGuide />} />
-    <Route path="/planning-guide/create" element={<CreatePlantingGuide />} />
+      {/* Erdkk */}
+      <Route path="/erdkk" element={<Erdkk />} />
+      <Route path="/erdkk/1/view" element={<ViewErdkk />} />
 
-    {/* field */}
-    <Route path="/field" element={<Field />} />
-  </Routes>
-);
+      {/* planting guide */}
+      <Route path="/planning-guide" element={<PlantingGuide />} />
+      <Route path="/planning-guide/1/edit" element={<UpdatePlantingGuide />} />
+      <Route path="/planning-guide/create" element={<CreatePlantingGuide />} />
+
+      {/* field */}
+      <Route path="/field" element={<Field />} />
+    </Routes>
+  );
+};
 
 function App() {
   const location = useLocation();
@@ -98,17 +119,19 @@ function App() {
     first.toUpperCase() + rest.join("").toLowerCase();
   return (
     <ChakraProvider>
-      <div className="App">
-        <Navbar />
-        <div className="navigation">
-          <h3 letterSpacing="10px">
-            {location.pathname === "/" ? "Home" : capitalize(title)}
-          </h3>
+      <UserContext>
+        <div className="App">
+          <Navbar />
+          <div className="navigation">
+            <h3 letterSpacing="10px">
+              {location.pathname === "/" ? "Home" : capitalize(title)}
+            </h3>
+          </div>
+          <div className="app-body">
+            <Routing />
+          </div>
         </div>
-        <div className="app-body">
-          <Routing />
-        </div>
-      </div>
+      </UserContext>
     </ChakraProvider>
   );
 }

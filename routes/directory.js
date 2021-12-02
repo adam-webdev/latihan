@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const Directory = mongoose.model("Directory");
-
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 // find all
 router.get("/api/directory", auth, (req, res) => {
   Directory.find()
@@ -15,26 +16,30 @@ router.get("/api/directory", auth, (req, res) => {
     });
 });
 // create
-router.post("/api/directory", auth, (req, res) => {
-  const { name, address, description, phoneNumber, picture } = req.body;
-  if (!name || !address || !picture || !description || !phoneNumber) {
-    res.status(404).json({ message: "Semua input harus diisi !" });
-  }
-  const directory = new Directory({
-    name,
-    address,
-    description,
-    phoneNumber,
-    picture,
-  });
-
-  directory
-    .save()
+router.post("/api/directory", [upload.single("picture"), auth], (req, res) => {
+  cloudinary.uploader
+    .upload(req.file.path)
     .then((result) => {
-      res.status(201).json({ message: "Directory berhasil disimpan" });
+      const { name, address, description, phoneNumber } = req.body;
+      const directory = new Directory({
+        name,
+        address,
+        description,
+        phoneNumber,
+        picture: result.secure_url,
+        cloudinary_id: result.public_id,
+      });
+      directory
+        .save()
+        .then((directory) => {
+          res.status(201).json({ message: "directory berhasil disimpan" });
+        })
+        .catch((err) => {
+          res.status(404).json({ message: err });
+        });
     })
     .catch((err) => {
-      res.status(404).json({ message: "terjadi kesalahan" });
+      res.status(404).json({ message: err });
     });
 });
 
@@ -51,31 +56,64 @@ router.get("/api/directory/:id", auth, (req, res) => {
 });
 
 //update
-router.put("/api/directory/:id", auth, (req, res) => {
-  const { name, address, description, phoneNumber, picture } = req.body;
-  if (!name || !address || !picture || !description || !phoneNumber) {
-    res.status(404).json({ message: "Semua input harus diisi !" });
+router.put(
+  "/api/directory/:id",
+  [upload.single("picture"), auth],
+  (req, res) => {
+    Directory.findById(req.params.id)
+      .then((directory) => {
+        cloudinary.uploader.destroy(directory.cloudinary_id);
+        //jika ada request file
+        if (req.file) {
+          cloudinary.uploader
+            .upload(req.file.path)
+            .then((result) => {
+              const data = {
+                name: req.body.name || directory.name,
+                address: req.body.address || directory.address,
+                phoneNumber: req.body.phoneNumber || directory.phoneNumber,
+                description: req.body.description || directory.description,
+                picture: result?.secure_url || directory.picture,
+                cloudinary_id: result?.public_id || directory.cloudinary_id,
+              };
+
+              Directory.findByIdAndUpdate(req.params.id, data, {
+                new: true,
+              })
+                .then((res) => {
+                  res.json({ message: "Berhasil update", res });
+                })
+                .catch((err) => {
+                  res.json({ message: err });
+                });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+          // jika tidak ada request file
+        } else {
+          Directory.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+          })
+            .then((res) => {
+              res.json({ message: "Berhasil update", res });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+        }
+      })
+      .catch((err) => {
+        res.json({ message: err });
+      });
   }
-  Directory.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    .then((data) => {
-      if (!data) {
-        res.status(400).json({ message: "Directory Price tidak ditemukan" });
-      }
-      res
-        .status(200)
-        .json({ message: "Directory Price berhasil diupdate", data });
-    })
-    .catch((err) => {
-      res
-        .status(400)
-        .json({ message: "Directory Price tidak ditemukan", error: err });
-    });
-});
+);
 
 //delete
 router.delete("/api/directory/:id", auth, (req, res) => {
   Directory.findByIdAndRemove({ _id: req.params.id }).exec((err, directory) => {
     if (directory) {
+      cloudinary.uploader.destroy(directory.cloudinary_id);
       return res.status(200).json({ message: "Berhasil dihapus" });
     }
     res.send(404).json({ error: err });
