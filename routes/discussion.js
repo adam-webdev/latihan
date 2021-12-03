@@ -8,6 +8,7 @@ const upload = require("../utils/multer");
 // find all
 router.get("/api/discussion", auth, (req, res) => {
   Discussion.find()
+    .populate("user_id", "_id s")
     .then((discussion) => {
       res.status(200).json({ error: false, message: "success", discussion });
     })
@@ -100,8 +101,8 @@ router.put(
               Discussion.findByIdAndUpdate(req.params.id, data, {
                 new: true,
               })
-                .then((res) => {
-                  res.json({ message: "Berhasil update", res });
+                .then((result) => {
+                  res.json({ message: "Berhasil update", result });
                 })
                 .catch((err) => {
                   res.json({ message: err });
@@ -115,8 +116,8 @@ router.put(
           Discussion.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
           })
-            .then((res) => {
-              res.json({ message: "Berhasil update", res });
+            .then((result) => {
+              res.json({ message: "Berhasil update", result });
             })
             .catch((err) => {
               res.json({ message: err });
@@ -131,23 +132,21 @@ router.put(
 
 //delete
 router.delete("/api/discussion/:id", auth, (req, res) => {
-  Discussion.findOne({ _id: req.params.id })
-    .populate("user_id", "_id")
-    .exec((err, discussion) => {
-      if (err || !discussion) {
-        return res.status(422).json({ message: "Tidak ditemukan" });
-      }
-      if (discussion.user_id._id.toString() === req.user._id.toString()) {
-        cloudinary.uploader.destroy(discussion.cloudinary_id);
-        discussion
-          .remove()
-          .then((result) => {
-            res.json({ message: "berhasil dihapus" });
-          })
-          .catch((err) => {
-            res.json({ message: "error" });
-          });
-      }
-    });
+  Discussion.findOne({ _id: req.params.id }).exec((err, discussion) => {
+    if (err || !discussion) {
+      return res.status(422).json({ message: "Tidak ditemukan" });
+    }
+    // if (discussion.user_id._id.toString() === req.user._id.toString()) {
+    cloudinary.uploader.destroy(discussion.cloudinary_id);
+    discussion
+      .remove()
+      .then((result) => {
+        res.json({ message: "berhasil dihapus" });
+      })
+      .catch((err) => {
+        res.json({ message: "error" });
+      });
+    // }
+  });
 });
 module.exports = router;

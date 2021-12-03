@@ -29,8 +29,6 @@ router.get("/api/user/:id", auth, (req, res) => {
 router.put("/api/user/:id", [upload.single("picture"), auth], (req, res) => {
   User.findById(req.params.id)
     .then((users) => {
-      res.json(users);
-
       cloudinary.uploader.destroy(users.cloudinary_id);
       //jika ada request file
       if (req.file) {
@@ -49,8 +47,8 @@ router.put("/api/user/:id", [upload.single("picture"), auth], (req, res) => {
             };
 
             User.findByIdAndUpdate(req.params.id, data, { new: true })
-              .then((res) => {
-                res.json({ message: "Berhasil update", res });
+              .then((result) => {
+                res.json({ message: "Berhasil update", result });
               })
               .catch((err) => {
                 res.json({ message: err });
@@ -62,8 +60,8 @@ router.put("/api/user/:id", [upload.single("picture"), auth], (req, res) => {
         // jika tidak ada request file
       } else {
         User.findByIdAndUpdate(req.params.id, req.body, { new: true })
-          .then((res) => {
-            res.json({ message: "Berhasil update", res });
+          .then((result) => {
+            res.json({ message: "Berhasil update", result });
           })
           .catch((err) => {
             res.json({ message: err });

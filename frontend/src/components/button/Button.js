@@ -15,7 +15,7 @@ export const ButtonEdit = ({ link, title }) => {
     </Link>
   );
 };
-export const ButtonCreate = ({ link, title }) => {
+export const ButtonCreate = ({ link, title, disabled }) => {
   return (
     <Link to={link} className="link-button-create">
       <div className="button-create">{title}</div>
@@ -48,11 +48,16 @@ export const ButtonDelete = ({ onClick }) => {
     </div>
   );
 };
-export const ButtonUpdate = ({ onClick, title }) => {
+export const ButtonUpdate = ({ onClick, title, disabled }) => {
   return (
-    <div className="button-update" onClick={onClick}>
+    <button
+      type="button"
+      className="button-update"
+      onClick={onClick}
+      disabled={disabled}
+    >
       {title}
-    </div>
+    </button>
   );
 };
 

@@ -3,13 +3,14 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const Plant = mongoose.model("Plant");
-const Field = mongoose.model("Field");
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
 
 // find all
 router.get("/api/plant", auth, (req, res) => {
   Plant.find()
+    .populate("user_id", "_id name")
+    .populate("field_id", "name")
     .then((plant) => {
       res.status(200).json({ error: false, message: "success", plant });
     })
@@ -57,12 +58,14 @@ router.post("/api/plant", [upload.single("picture"), auth], (req, res) => {
 
 // find one detail
 router.get("/api/plant/:id", auth, (req, res) => {
-  Plant.findOne({ _id: req.params.id }).exec((err, plant) => {
-    if (err || !plant) {
-      res.status(404).json({ message: err, error: true });
-    }
-    res.status(200).json({ error: false, message: "success", plant });
-  });
+  Plant.findOne({ _id: req.params.id })
+    .populate("field_id", "_id name")
+    .exec((err, plant) => {
+      if (err || !plant) {
+        res.status(404).json({ message: err, error: true });
+      }
+      res.status(200).json({ error: false, message: "success", plant });
+    });
 });
 
 //update
@@ -91,8 +94,8 @@ router.put("/api/plant/:id", [upload.single("picture"), auth], (req, res) => {
             Plant.findByIdAndUpdate(req.params.id, data, {
               new: true,
             })
-              .then((res) => {
-                res.json({ message: "Berhasil update", res });
+              .then((result) => {
+                res.json({ message: "Berhasil update", result });
               })
               .catch((err) => {
                 res.json({ message: err });
@@ -106,8 +109,8 @@ router.put("/api/plant/:id", [upload.single("picture"), auth], (req, res) => {
         Plant.findByIdAndUpdate(req.params.id, req.body, {
           new: true,
         })
-          .then((res) => {
-            res.json({ message: "Berhasil update", res });
+          .then((result) => {
+            res.json({ message: "Berhasil update", result });
           })
           .catch((err) => {
             res.json({ message: err });

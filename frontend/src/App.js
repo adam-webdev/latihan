@@ -69,22 +69,25 @@ const Routing = () => {
 
       {/* producer price */}
       <Route path="/producer-price" element={<ProductPrice />} />
-      <Route path="/producer-price/1/edit" element={<UpdateProducerPrice />} />
+      <Route
+        path="/producer-price/:id/edit"
+        element={<UpdateProducerPrice />}
+      />
       <Route path="/producer-price/create" element={<CreateProducerPrice />} />
 
       {/* directory */}
       <Route path="/directory" element={<Directory />} />
-      <Route path="/directory/1/edit" element={<UpdateDirectory />} />
+      <Route path="/directory/:id/edit" element={<UpdateDirectory />} />
       <Route path="/directory/create" element={<CreateDirectory />} />
 
       {/* complain */}
       <Route path="/complain" element={<Complain />} />
-      <Route path="/complain/1/view" element={<ViewComplain />} />
+      <Route path="/complain/:id/view" element={<ViewComplain />} />
 
       {/* pest-management */}
       <Route path="/pest-management" element={<PestManagement />} />
       <Route
-        path="/pest-management/1/edit"
+        path="/pest-management/:id/edit"
         element={<UpdatePestManagement />}
       />
       <Route
@@ -97,11 +100,14 @@ const Routing = () => {
 
       {/* Erdkk */}
       <Route path="/erdkk" element={<Erdkk />} />
-      <Route path="/erdkk/1/view" element={<ViewErdkk />} />
+      <Route path="/erdkk/:id/view" element={<ViewErdkk />} />
 
       {/* planting guide */}
       <Route path="/planning-guide" element={<PlantingGuide />} />
-      <Route path="/planning-guide/1/edit" element={<UpdatePlantingGuide />} />
+      <Route
+        path="/planning-guide/:id/edit"
+        element={<UpdatePlantingGuide />}
+      />
       <Route path="/planning-guide/create" element={<CreatePlantingGuide />} />
 
       {/* field */}

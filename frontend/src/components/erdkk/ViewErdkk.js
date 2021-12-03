@@ -1,16 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 // import "./../table/table.css";
 import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react";
 import { ButtonStatus } from "../button/Button";
-
+import { baseUrl } from "../../context/UserContext";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { useSnackbar } from "notistack";
 const ViewErdkk = () => {
-  const handleClick = () => {
-    if (window.confirm("yakin ingin menghapus?")) {
-    }
+  const [erdkk, setErdkk] = useState();
+  const [status, setStatus] = useState();
+  const [loading, setLoading] = useState();
+  const { id } = useParams();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const detail = {
+      method: "GET",
+      url: `${baseUrl}/erdkk/${id}`,
+      headers: {
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+    };
+
+    closeSnackbar();
+    axios
+      .request(detail)
+      .then((res) => {
+        setErdkk(res.data.erdkk);
+      })
+      .catch((error) => {
+        enqueueSnackbar("erdkk tidak ditemukan", {
+          variant: "error",
+        });
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSubmitUpdate = (params) => {
+    setStatus(params);
+    const changeStatus = {
+      method: "PUT",
+      url: `${baseUrl}/erdkk/${id}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+      data: status,
+    };
+    setLoading(true);
+    axios
+      .request(changeStatus)
+      .then((resStatus) => {
+        console.log(resStatus);
+        enqueueSnackbar("status berhasil diubah", {
+          variant: "success",
+        });
+        setLoading(false);
+      })
+      .catch((error) => {
+        enqueueSnackbar("oops. gagal merubah status", {
+          variant: "error",
+        });
+        setLoading(false);
+      });
   };
+
   return (
-    // <Box p="4" bg="#fff">
-    // </Box>
     <Table variant="simple" size="md" bg="#fff">
       <Thead bg="rgb(0,0,0,10%)">
         <Th>User name</Th>
@@ -21,16 +76,15 @@ const ViewErdkk = () => {
         <Th>Address</Th>
         <Th>Email</Th>
       </Thead>
-
       <Tbody>
         <Tr>
-          <Td>adam maulana</Td>
-          <Td>Cinta Farmer</Td>
-          <Td>1297318</Td>
-          <Td>Sisir</Td>
-          <Td>Susi</Td>
-          <Td>Bekasi Jawa Barat</Td>
-          <Td>susi@gmail.com</Td>
+          <Td>{erdkk?.user_id.name || null}</Td>
+          <Td>{erdkk?.farmerName}</Td>
+          <Td>{erdkk?.idCard}</Td>
+          <Td>{erdkk?.gapoktan}</Td>
+          <Td>{erdkk?.motherName}</Td>
+          <Td>{erdkk?.address}</Td>
+          <Td>{erdkk?.user_id.email || null}</Td>
         </Tr>
       </Tbody>
       <Thead bg="rgb(0,0,0,10%)">
@@ -44,20 +98,28 @@ const ViewErdkk = () => {
       </Thead>
       <Tbody>
         <Tr>
-          <Td>coba</Td>
-          <Td>Bekasi</Td>
-          <Td>17510</Td>
-          <Td>06-05-1999</Td>
-          <Td>060688392</Td>
-          <Td>Delivered</Td>
+          <Td>{erdkk?.poktanName}</Td>
+          <Td>{erdkk?.birthPlace}</Td>
+          <Td>{erdkk?.villageCode}</Td>
+          <Td>{erdkk?.birthDate}</Td>
+          <Td>{erdkk?.distributorCode}</Td>
+          <Td>{erdkk?.status}</Td>
           <Td>
-            <ButtonStatus onClick={handleClick} title="Accepted" color="blue" />
             <ButtonStatus
-              onClick={handleClick}
+              onClick={handleSubmitUpdate}
+              title="Accepted"
+              color="blue"
+            />
+            <ButtonStatus
+              onClick={handleSubmitUpdate}
               title="Delivered"
               color="green"
             />
-            <ButtonStatus onClick={handleClick} title="Rejected" color="red" />
+            <ButtonStatus
+              onClick={handleSubmitUpdate}
+              title="Rejected"
+              color="red"
+            />
           </Td>
         </Tr>
       </Tbody>

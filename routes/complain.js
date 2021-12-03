@@ -8,6 +8,7 @@ const upload = require("../utils/multer");
 // find all
 router.get("/api/complain", auth, (req, res) => {
   Complain.find()
+    .populate("user_id", "_id name email phoneNumber")
     .then((complain) => {
       res.status(200).json({ error: false, message: "success", complain });
     })
@@ -25,6 +26,7 @@ router.post("/api/complain", [upload.single("picture"), auth], (req, res) => {
         locationDetail,
         status,
         description,
+        user_id: req.user._id,
         picture: result.secure_url,
         cloudinary_id: result.public_id,
       });
@@ -77,8 +79,8 @@ router.put(
               Complain.findByIdAndUpdate(req.params.id, data, {
                 new: true,
               })
-                .then((res) => {
-                  res.json({ message: "Berhasil update", res });
+                .then((result) => {
+                  res.json({ message: "Berhasil update", result });
                 })
                 .catch((err) => {
                   res.json({ message: err });
@@ -92,8 +94,8 @@ router.put(
           Complain.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
           })
-            .then((res) => {
-              res.json({ message: "Berhasil update", res });
+            .then((result) => {
+              res.json({ message: "Berhasil update", result });
             })
             .catch((err) => {
               res.json({ message: err });

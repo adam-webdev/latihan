@@ -85,8 +85,8 @@ router.put(
               Pestmanagement.findByIdAndUpdate(req.params.id, data, {
                 new: true,
               })
-                .then((res) => {
-                  res.json({ message: "Berhasil update", res });
+                .then((result) => {
+                  res.json({ message: "Berhasil update", result });
                 })
                 .catch((err) => {
                   res.json({ message: err });
@@ -100,8 +100,8 @@ router.put(
           Pestmanagement.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
           })
-            .then((res) => {
-              res.json({ message: "Berhasil update", res });
+            .then((result) => {
+              res.json({ message: "Berhasil update", result });
             })
             .catch((err) => {
               res.json({ message: err });

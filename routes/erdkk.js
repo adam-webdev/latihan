@@ -7,6 +7,7 @@ const Erdkk = mongoose.model("Erdkk");
 // find all
 router.get("/api/erdkk", auth, (req, res) => {
   Erdkk.find()
+    .populate("user_id", "name email")
     .then((erdkk) => {
       res.status(200).json({ error: false, message: "success", erdkk });
     })
@@ -45,7 +46,7 @@ router.post("/api/erdkk", auth, (req, res) => {
     res.status(404).json({ message: "semua input harus diisi" });
   }
   const erdkks = new Erdkk({
-    user_id: req.user,
+    user_id: req.user._id,
     villageCode,
     gapoktan,
     address,
@@ -71,12 +72,14 @@ router.post("/api/erdkk", auth, (req, res) => {
 
 // find one detail
 router.get("/api/erdkk/:id", auth, (req, res) => {
-  Erdkk.findOne({ _id: req.params.id }).exec((err, erdkk) => {
-    if (err || !erdkk) {
-      res.status(404).json({ message: err, error: true });
-    }
-    res.status(200).json({ error: false, message: "success", erdkk });
-  });
+  Erdkk.findOne({ _id: req.params.id })
+    .populate("user_id", "name email")
+    .exec((err, erdkk) => {
+      if (err || !erdkk) {
+        res.status(404).json({ message: err, error: true });
+      }
+      res.status(200).json({ error: false, message: "success", erdkk });
+    });
 });
 
 //update

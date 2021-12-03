@@ -72,12 +72,20 @@ router.put("/api/news/:id", [auth, upload.single("picture")], (req, res) => {
             };
 
             News.findByIdAndUpdate(req.params.id, data, { new: true })
-              .then((res) => {
-                res.json({ message: "Berhasil update", res });
+              .then((result) => {
+                res.json({ message: "Berhasil update", result });
               })
               .catch((err) => {
                 res.json({ message: err });
               });
+          })
+          .catch((err) => {
+            res.json({ message: err });
+          });
+      } else {
+        News.findByIdAndUpdate(req.params.id, req.body, { new: true })
+          .then((result) => {
+            res.json({ message: "Berhasil update", result });
           })
           .catch((err) => {
             res.json({ message: err });

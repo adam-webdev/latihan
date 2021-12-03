@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
-const product = mongoose.model("Product");
+const Product = mongoose.model("Product");
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
 // find all
+
 router.get("/api/product", auth, (req, res) => {
-  product
-    .find()
+  Product.find()
+    .populate("user_id", "_id name phoneNumber")
     .then((product) => {
       res.status(200).json({ error: false, message: "success", product });
     })
@@ -16,25 +17,27 @@ router.get("/api/product", auth, (req, res) => {
       res.status(404).json({ error: true, message: err });
     });
 });
+
 // create
 router.post("/api/product", [upload.single("picture"), auth], (req, res) => {
   cloudinary.uploader
     .upload(req.file.path)
     .then((result) => {
       const { price, description, category, commodity, stock_kg } = req.body;
+      const user_id = req.user._id;
       const product = new Product({
+        user_id,
         price,
-        user_id: req.user,
         description,
         category,
         commodity,
         stock_kg,
-        picture: result.secure_url,
-        cloudinary_id: result.public_id,
+        picture: result?.secure_url,
+        cloudinary_id: result?.public_id,
       });
       product
         .save()
-        .then((product) => {
+        .then((products) => {
           res.status(201).json({ message: "product berhasil disimpan" });
         })
         .catch((err) => {
@@ -42,13 +45,13 @@ router.post("/api/product", [upload.single("picture"), auth], (req, res) => {
         });
     })
     .catch((err) => {
-      res.status(401).json({ message: err });
+      res.status(404).json({ message: err });
     });
 });
 
 // find one detail
 router.get("/api/product/:id", auth, (req, res) => {
-  product.findOne({ _id: req.params.id }).exec((err, product) => {
+  Product.findOne({ _id: req.params.id }).exec((err, product) => {
     if (err || !product) {
       res.status(404).json({ message: err, error: true });
     }
@@ -60,8 +63,6 @@ router.get("/api/product/:id", auth, (req, res) => {
 router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
   Product.findById(req.params.id)
     .then((product) => {
-      res.json(product);
-
       cloudinary.uploader.destroy(product.cloudinary_id);
       //jika ada request file
       if (req.file) {
@@ -79,8 +80,8 @@ router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
             };
 
             Product.findByIdAndUpdate(req.params.id, data, { new: true })
-              .then((res) => {
-                res.json({ message: "Berhasil update", res });
+              .then((result) => {
+                res.json({ message: "Berhasil update", result });
               })
               .catch((err) => {
                 res.json({ message: err });
@@ -92,8 +93,8 @@ router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
         // jika tidak ada request file
       } else {
         Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
-          .then((res) => {
-            res.json({ message: "Berhasil update", res });
+          .then((result) => {
+            res.json({ message: "Berhasil update", result });
           })
           .catch((err) => {
             res.json({ message: err });
@@ -107,7 +108,7 @@ router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
 
 //delete
 router.delete("/api/product/:id", auth, (req, res) => {
-  product.findByIdAndRemove({ _id: req.params.id }).exec((err, product) => {
+  Product.findByIdAndRemove({ _id: req.params.id }).exec((err, product) => {
     if (product) {
       cloudinary.uploader.destroy(product.cloudinary_id);
       return res.status(200).json({ message: "Berhasil dihapus" });

@@ -77,12 +77,14 @@ const News = () => {
                 <Td>{item.contents}</Td>
                 <Td>{item.writter}</Td>
                 <Td>
-                  <img
-                    src={item.picture}
-                    alt="news"
-                    width="50px"
-                    height="30px"
-                  />
+                  <a href={item.picture} target="_blank" rel="noreferrer">
+                    <img
+                      src={item.picture}
+                      alt="news"
+                      width="50px"
+                      height="30px"
+                    />
+                  </a>
                 </Td>
                 <Td>
                   <Flex>

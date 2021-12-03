@@ -1,13 +1,70 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 // import "./../table/table.css";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
 import { ButtonStatus } from "../button/Button";
-
+import { baseUrl } from "../../context/UserContext";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { useSnackbar } from "notistack";
 const ViewComplain = () => {
-  const handleClick = () => {
-    if (window.confirm("yakin ingin menghapus?")) {
-    }
+  const [complain, setComplain] = useState();
+  const [status, setStatus] = useState();
+  const [loading, setLoading] = useState();
+  const { id } = useParams();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const detail = {
+      method: "GET",
+      url: `${baseUrl}/complain/${id}`,
+      headers: {
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+    };
+
+    closeSnackbar();
+    axios
+      .request(detail)
+      .then((res) => {
+        setComplain(res.data.complain);
+      })
+      .catch((error) => {
+        enqueueSnackbar("complain tidak ditemukan", {
+          variant: "error",
+        });
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSubmitUpdate = (params) => {
+    setStatus(params);
+    const changeStatus = {
+      method: "PUT",
+      url: `${baseUrl}/complain/${id}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+      data: status,
+    };
+    setLoading(true);
+    axios
+      .request(changeStatus)
+      .then((resStatus) => {
+        console.log(resStatus);
+        enqueueSnackbar("status berhasil diubah", {
+          variant: "success",
+        });
+        setLoading(false);
+      })
+      .catch((error) => {
+        enqueueSnackbar("oops. gagal merubah status", {
+          variant: "error",
+        });
+        setLoading(false);
+      });
   };
+  console.log(status);
   return (
     <Table variant="simple" size="md" bg="#fff">
       <Thead>
@@ -21,17 +78,25 @@ const ViewComplain = () => {
       </Thead>
       <Tbody>
         <Tr>
-          <Td>adam maulana</Td>
-          <Td>adam maulana@gmail.com</Td>
-          <Td>Pecinta Alam mantapppp</Td>
-          <Td>0890789789</Td>
-          <Td>Bekasi Jawa Barat</Td>
-          <Td>On Prosess</Td>
+          <Td>{complain?.user_id.name}</Td>
+          <Td>{complain?.user_id.email}</Td>
+          <Td>{complain?.description}</Td>
+          <Td>{complain?.user_id.phoneNumber}</Td>
+          <Td>{complain?.locationDetail}</Td>
+          <Td>{status}</Td>
           <Td>
-            <ButtonStatus onClick={handleClick} title="New" color="blue" />
-            <ButtonStatus onClick={handleClick} title="Done" color="green" />
             <ButtonStatus
-              onClick={handleClick}
+              onClick={() => handleSubmitUpdate("New")}
+              title="New"
+              color="blue"
+            />
+            <ButtonStatus
+              onClick={() => handleSubmitUpdate("Done")}
+              title="Done"
+              color="green"
+            />
+            <ButtonStatus
+              onClick={() => handleSubmitUpdate("On process")}
               title="On Prosess"
               color="red"
             />
