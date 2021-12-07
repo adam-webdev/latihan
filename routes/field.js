@@ -8,6 +8,7 @@ const upload = require("../utils/multer");
 // find all
 router.get("/api/field", auth, (req, res) => {
   Field.find()
+    .populate("user_id", "name")
     .then((field) => {
       res.status(200).json({ error: false, message: "success", field });
     })

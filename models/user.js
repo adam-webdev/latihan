@@ -48,4 +48,17 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.pre("remove", { document: false, query: true }, function (next) {
+  // 'this' is the client being removed. Provide callbacks here if you want
+  // to be notified of the calls' result.
+  // this.model("Discussion").remove(
+  //   { user_id: this._id },
+  //   { $unset: { user_id: 1 } },
+  //   { multi: true },
+  //   next
+  // );
+  this.model("Discussion").remove().exec();
+  next();
+});
+
 module.exports = mongoose.model("User", userSchema);

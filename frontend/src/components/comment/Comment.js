@@ -1,13 +1,62 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ButtonDelete } from "../button/Button";
-// import "./../table/table.css";
 import { Table, Thead, Tbody, Tr, Th, Td, Flex } from "@chakra-ui/react";
+import { useSnackbar } from "notistack";
+import { baseUrl } from "../../context/UserContext";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const Comment = () => {
-  const handleClick = () => {
-    if (window.confirm("yakin ingin menghapus?")) {
-    }
+  const [comment, setComment] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { id } = useParams();
+  const fetchComment = () => {
+    const options = {
+      method: "GET",
+      url: `${baseUrl}/comment/${id}`,
+      headers: {
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+    };
+    setLoading(true);
+    axios
+      .request(options)
+      .then((response) => {
+        console.log(response.data);
+        setComment(response.data.comment);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
+
+  const handleDelete = (commentId) => {
+    closeSnackbar();
+    const deleteOptions = {
+      method: "DELETE",
+      url: `${baseUrl}/comment/${commentId}`,
+      headers: {
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+    };
+    axios
+      .request(deleteOptions)
+      .then((result) => {
+        enqueueSnackbar("Berhasil dihapus", { variant: "success" });
+        fetchComment();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    fetchComment();
+  }, []);
+
+  console.log("comment : ", comment);
   return (
     <Table variant="simple" size="md" bg="#fff">
       <Thead>
@@ -19,30 +68,27 @@ const Comment = () => {
         <Th>Action</Th>
       </Thead>
       <Tbody>
-        <Tr>
-          <Td>1</Td>
-          <Td>2</Td>
-          <Td>adam maulana</Td>
-          <Td>Pecinta Alam</Td>
-          <Td>Keren</Td>
-          <Td>
-            <Flex>
-              <ButtonDelete onClick={handleClick} title="Delete" />
-            </Flex>
-          </Td>
-        </Tr>
-        <Tr>
-          <Td>3</Td>
-          <Td>3</Td>
-          <Td> maulana</Td>
-          <Td>Pecinta Wanita</Td>
-          <Td>Mantap Betul bang keren pokokknya sukses terus dah yaa</Td>
-          <Td>
-            <Flex>
-              <ButtonDelete onClick={handleClick} title="Delete" />
-            </Flex>
-          </Td>
-        </Tr>
+        {loading ? (
+          <tr>loading</tr>
+        ) : (
+          comment?.map((item, index) => (
+            <Tr key={index}>
+              <Td>{index + 1}</Td>
+              <Td>{item.user_id ? item.user_id._id : ""}</Td>
+              <Td>{item.user_id ? item.user_id.name : ""}</Td>
+              <Td>{item.discussion_id.title}</Td>
+              <Td>{item.text}</Td>
+              <Td>
+                <Flex>
+                  <ButtonDelete
+                    onClick={handleDelete(item._id)}
+                    title="Delete"
+                  />
+                </Flex>
+              </Td>
+            </Tr>
+          ))
+        )}
       </Tbody>
     </Table>
   );

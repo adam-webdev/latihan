@@ -66,9 +66,9 @@ router.put(
   (req, res) => {
     Producerprice.findById(req.params.id)
       .then((producerprice) => {
-        cloudinary.uploader.destroy(producerprice.cloudinary_id);
         //jika ada request file
         if (req.file) {
+          cloudinary.uploader.destroy(producerprice.cloudinary_id);
           cloudinary.uploader
             .upload(req.file.path)
             .then((result) => {
@@ -76,8 +76,8 @@ router.put(
                 price: req.body.price || producerprice.price,
                 comodityName:
                   req.body.comodityName || producerprice.comodityName,
-                picture: result?.secure_url || producerprice.picture,
-                cloudinary_id: result?.public_id || producerprice.cloudinary_id,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
               };
 
               Producerprice.findByIdAndUpdate(req.params.id, data, {
@@ -95,7 +95,13 @@ router.put(
             });
           // jika tidak ada request file
         } else {
-          Producerprice.findByIdAndUpdate(req.params.id, req.body, {
+          const oldData = {
+            price: req.body.price || producerprice.price,
+            comodityName: req.body.comodityName || producerprice.comodityName,
+            picture: producerprice.picture,
+            cloudinary_id: producerprice.cloudinary_id,
+          };
+          Producerprice.findByIdAndUpdate(req.params.id, oldData, {
             new: true,
           })
             .then((result) => {

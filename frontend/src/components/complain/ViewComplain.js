@@ -8,12 +8,11 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 const ViewComplain = () => {
   const [complain, setComplain] = useState();
-  const [status, setStatus] = useState();
   const [loading, setLoading] = useState();
   const { id } = useParams();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  useEffect(() => {
+  const fetchComplain = () => {
     const detail = {
       method: "GET",
       url: `${baseUrl}/complain/${id}`,
@@ -34,10 +33,9 @@ const ViewComplain = () => {
         });
         setLoading(false);
       });
-  }, []);
+  };
 
   const handleSubmitUpdate = (params) => {
-    setStatus(params);
     const changeStatus = {
       method: "PUT",
       url: `${baseUrl}/complain/${id}`,
@@ -45,8 +43,9 @@ const ViewComplain = () => {
         "Content-Type": "application/json",
         Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
       },
-      data: status,
+      data: { status: params },
     };
+    closeSnackbar();
     setLoading(true);
     axios
       .request(changeStatus)
@@ -55,7 +54,7 @@ const ViewComplain = () => {
         enqueueSnackbar("status berhasil diubah", {
           variant: "success",
         });
-        setLoading(false);
+        fetchComplain();
       })
       .catch((error) => {
         enqueueSnackbar("oops. gagal merubah status", {
@@ -64,7 +63,10 @@ const ViewComplain = () => {
         setLoading(false);
       });
   };
-  console.log(status);
+  useEffect(() => {
+    fetchComplain();
+  }, []);
+
   return (
     <Table variant="simple" size="md" bg="#fff">
       <Thead>
@@ -78,12 +80,12 @@ const ViewComplain = () => {
       </Thead>
       <Tbody>
         <Tr>
-          <Td>{complain?.user_id.name}</Td>
-          <Td>{complain?.user_id.email}</Td>
+          <Td>{complain?.user_id ? complain.user_id.name : ""}</Td>
+          <Td>{complain?.user_id ? complain.user_id.email : ""}</Td>
           <Td>{complain?.description}</Td>
-          <Td>{complain?.user_id.phoneNumber}</Td>
+          <Td>{complain?.user_id ? complain.user_id.phoneNumber : ""}</Td>
           <Td>{complain?.locationDetail}</Td>
-          <Td>{status}</Td>
+          <Td>{complain?.status}</Td>
           <Td>
             <ButtonStatus
               onClick={() => handleSubmitUpdate("New")}

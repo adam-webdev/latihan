@@ -65,7 +65,7 @@ const Routing = () => {
       {/* discussion */}
       <Route path="/discussion" element={<Discussion />} />
       <Route path="/discussion/create" element={<CreateDiscussion />} />
-      <Route path="/discussion/1/comment" element={<Comment />} />
+      <Route path="/comment/:id" element={<Comment />} />
 
       {/* producer price */}
       <Route path="/producer-price" element={<ProductPrice />} />
@@ -103,12 +103,12 @@ const Routing = () => {
       <Route path="/erdkk/:id/view" element={<ViewErdkk />} />
 
       {/* planting guide */}
-      <Route path="/planning-guide" element={<PlantingGuide />} />
+      <Route path="/planting-guide" element={<PlantingGuide />} />
       <Route
-        path="/planning-guide/:id/edit"
+        path="/planting-guide/:id/edit"
         element={<UpdatePlantingGuide />}
       />
-      <Route path="/planning-guide/create" element={<CreatePlantingGuide />} />
+      <Route path="/planting-guide/create" element={<CreatePlantingGuide />} />
 
       {/* field */}
       <Route path="/field" element={<Field />} />

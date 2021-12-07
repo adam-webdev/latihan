@@ -22,6 +22,7 @@ const complainSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
+      default: "New",
     },
     cloudinary_id: {
       type: String,

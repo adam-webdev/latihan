@@ -62,9 +62,9 @@ router.put(
   (req, res) => {
     Directory.findById(req.params.id)
       .then((directory) => {
-        cloudinary.uploader.destroy(directory.cloudinary_id);
         //jika ada request file
         if (req.file) {
+          cloudinary.uploader.destroy(directory.cloudinary_id);
           cloudinary.uploader
             .upload(req.file.path)
             .then((result) => {
@@ -73,8 +73,8 @@ router.put(
                 address: req.body.address || directory.address,
                 phoneNumber: req.body.phoneNumber || directory.phoneNumber,
                 description: req.body.description || directory.description,
-                picture: result?.secure_url || directory.picture,
-                cloudinary_id: result?.public_id || directory.cloudinary_id,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
               };
 
               Directory.findByIdAndUpdate(req.params.id, data, {
@@ -92,7 +92,15 @@ router.put(
             });
           // jika tidak ada request file
         } else {
-          Directory.findByIdAndUpdate(req.params.id, req.body, {
+          const oldData = {
+            name: req.body.name || directory.name,
+            address: req.body.address || directory.address,
+            phoneNumber: req.body.phoneNumber || directory.phoneNumber,
+            description: req.body.description || directory.description,
+            picture: directory.picture,
+            cloudinary_id: directory.cloudinary_id,
+          };
+          Directory.findByIdAndUpdate(req.params.id, oldData, {
             new: true,
           })
             .then((result) => {

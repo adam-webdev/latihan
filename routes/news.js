@@ -58,8 +58,8 @@ router.put("/api/news/:id", [auth, upload.single("picture")], (req, res) => {
   News.findById(req.params.id)
     .then((news) => {
       res.json(news);
-      cloudinary.uploader.destroy(news.cloudinary_id);
       if (req.file) {
+        cloudinary.uploader.destroy(news.cloudinary_id);
         cloudinary.uploader
           .upload(req.file.path)
           .then((result) => {
@@ -67,8 +67,8 @@ router.put("/api/news/:id", [auth, upload.single("picture")], (req, res) => {
               title: req.body.title || news.title,
               contents: req.body.contents || news.contents,
               writter: req.body.writter || news.writter,
-              picture: result?.secure_url || news.picture,
-              cloudinary_id: result?.public_id || news.cloudinary_id,
+              picture: result?.secure_url,
+              cloudinary_id: result?.public_id,
             };
 
             News.findByIdAndUpdate(req.params.id, data, { new: true })
@@ -83,7 +83,14 @@ router.put("/api/news/:id", [auth, upload.single("picture")], (req, res) => {
             res.json({ message: err });
           });
       } else {
-        News.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const oldData = {
+          title: req.body.title || news.title,
+          contents: req.body.contents || news.contents,
+          writter: req.body.writter || news.writter,
+          picture: news.picture,
+          cloudinary_id: news.cloudinary_id,
+        };
+        News.findByIdAndUpdate(req.params.id, oldData, { new: true })
           .then((result) => {
             res.json({ message: "Berhasil update", result });
           })

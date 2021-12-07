@@ -46,6 +46,7 @@ const erdkkSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
+      default: "New",
     },
     distributorCode: {
       type: String,

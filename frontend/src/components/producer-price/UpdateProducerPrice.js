@@ -55,19 +55,14 @@ const UpdateProducerPrice = () => {
       data: dataPicture,
     };
 
-    closeSnackbar();
-    if (!comodityName || !price || !picture) {
-      enqueueSnackbar("semua field wajib diisi!", {
-        variant: "warning",
-      });
-      return;
-    }
     setLoading(true);
+    closeSnackbar();
+
     axios
       .request(options)
       .then((response) => {
         console.log(response.data);
-        enqueueSnackbar("producerprice berhasil ditambahkan", {
+        enqueueSnackbar("producerprice berhasil diupdate", {
           variant: "success",
         });
         setLoading(false);
@@ -93,6 +88,7 @@ const UpdateProducerPrice = () => {
         />
         <Text>Price : </Text>
         <Input
+          type="number"
           variant="filled"
           size="lg"
           placeholder={producerprice?.price}

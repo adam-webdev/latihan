@@ -68,18 +68,17 @@ router.put(
   (req, res) => {
     Pestmanagement.findById(req.params.id)
       .then((pestmanagement) => {
-        cloudinary.uploader.destroy(pestmanagement.cloudinary_id);
         //jika ada request file
         if (req.file) {
+          cloudinary.uploader.destroy(pestmanagement.cloudinary_id);
           cloudinary.uploader
             .upload(req.file.path)
             .then((result) => {
               const data = {
                 title: req.body.title || pestmanagement.title,
                 description: req.body.description || pestmanagement.description,
-                picture: result?.secure_url || pestmanagement.picture,
-                cloudinary_id:
-                  result?.public_id || pestmanagement.cloudinary_id,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
               };
 
               Pestmanagement.findByIdAndUpdate(req.params.id, data, {
@@ -97,7 +96,13 @@ router.put(
             });
           // jika tidak ada request file
         } else {
-          Pestmanagement.findByIdAndUpdate(req.params.id, req.body, {
+          const oldData = {
+            title: req.body.title || pestmanagement.title,
+            description: req.body.description || pestmanagement.description,
+            picture: pestmanagement.picture,
+            cloudinary_id: pestmanagement.cloudinary_id,
+          };
+          Pestmanagement.findByIdAndUpdate(req.params.id, oldData, {
             new: true,
           })
             .then((result) => {

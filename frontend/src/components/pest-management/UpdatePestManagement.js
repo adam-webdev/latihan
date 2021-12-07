@@ -56,18 +56,13 @@ const UpdatePestManagement = () => {
     };
 
     closeSnackbar();
-    if (!title || !description || !picture) {
-      enqueueSnackbar("semua field wajib diisi!", {
-        variant: "warning",
-      });
-      return;
-    }
+
     setLoading(true);
     axios
       .request(options)
       .then((response) => {
         console.log(response.data);
-        enqueueSnackbar("pestmanagement berhasil ditambahkan", {
+        enqueueSnackbar("pestmanagement berhasil diupdate", {
           variant: "success",
         });
         setLoading(false);

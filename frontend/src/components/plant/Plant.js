@@ -75,8 +75,8 @@ const Plant = () => {
           plant?.map((item, index) => (
             <Tr key={index}>
               <Td>{index + 1}</Td>
-              <Td>{item.user_id.name}</Td>
-              <Td>{item.field_id.name}</Td>
+              <Td>{item.user_id ? item.user_id.name : ""}</Td>
+              <Td>{item.field_id ? item.user_id.name : ""}</Td>
               <Td>{item.cultivationMethod}</Td>
               <Td>{item.commodity}</Td>
               <Td>{item.plantingPhase}</Td>

@@ -8,12 +8,11 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 const ViewErdkk = () => {
   const [erdkk, setErdkk] = useState();
-  const [status, setStatus] = useState();
   const [loading, setLoading] = useState();
   const { id } = useParams();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  useEffect(() => {
+  const fetchDetail = () => {
     const detail = {
       method: "GET",
       url: `${baseUrl}/erdkk/${id}`,
@@ -34,10 +33,9 @@ const ViewErdkk = () => {
         });
         setLoading(false);
       });
-  }, []);
+  };
 
   const handleSubmitUpdate = (params) => {
-    setStatus(params);
     const changeStatus = {
       method: "PUT",
       url: `${baseUrl}/erdkk/${id}`,
@@ -45,7 +43,7 @@ const ViewErdkk = () => {
         "Content-Type": "application/json",
         Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
       },
-      data: status,
+      data: { status: params },
     };
     setLoading(true);
     axios
@@ -55,6 +53,7 @@ const ViewErdkk = () => {
         enqueueSnackbar("status berhasil diubah", {
           variant: "success",
         });
+        fetchDetail();
         setLoading(false);
       })
       .catch((error) => {
@@ -64,7 +63,9 @@ const ViewErdkk = () => {
         setLoading(false);
       });
   };
-
+  useEffect(() => {
+    fetchDetail();
+  }, []);
   return (
     <Table variant="simple" size="md" bg="#fff">
       <Thead bg="rgb(0,0,0,10%)">
@@ -78,13 +79,13 @@ const ViewErdkk = () => {
       </Thead>
       <Tbody>
         <Tr>
-          <Td>{erdkk?.user_id.name || null}</Td>
+          <Td>{erdkk?.user_id ? erdkk.user_id.name : ""}</Td>
           <Td>{erdkk?.farmerName}</Td>
           <Td>{erdkk?.idCard}</Td>
           <Td>{erdkk?.gapoktan}</Td>
           <Td>{erdkk?.motherName}</Td>
           <Td>{erdkk?.address}</Td>
-          <Td>{erdkk?.user_id.email || null}</Td>
+          <Td>{erdkk?.user_id ? erdkk.user_id.email : ""}</Td>
         </Tr>
       </Tbody>
       <Thead bg="rgb(0,0,0,10%)">
@@ -106,17 +107,17 @@ const ViewErdkk = () => {
           <Td>{erdkk?.status}</Td>
           <Td>
             <ButtonStatus
-              onClick={handleSubmitUpdate}
+              onClick={() => handleSubmitUpdate("Accepted")}
               title="Accepted"
               color="blue"
             />
             <ButtonStatus
-              onClick={handleSubmitUpdate}
+              onClick={() => handleSubmitUpdate("Delivered")}
               title="Delivered"
               color="green"
             />
             <ButtonStatus
-              onClick={handleSubmitUpdate}
+              onClick={() => handleSubmitUpdate("Rejected")}
               title="Rejected"
               color="red"
             />

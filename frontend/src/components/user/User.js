@@ -94,7 +94,10 @@ const User = () => {
                 <Flex>
                   <ButtonEdit link={`/user/${user._id}/edit`} title="Edit" />
                   <ButtonDelete
-                    onClick={() => handleDelete(user._id)}
+                    onClick={() => {
+                      if (window.confirm("Yakin ingin menghapus ?"))
+                        handleDelete(user._id);
+                    }}
                     title="Delete"
                   />
                 </Flex>

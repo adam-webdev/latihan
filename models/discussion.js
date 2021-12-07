@@ -22,22 +22,19 @@ const discussionSchema = new mongoose.Schema(
     cloudinary_id: {
       type: String,
     },
-    comments: [
-      {
-        time: {
-          type: Date,
-          default: Date.now(),
-        },
-        name: {
-          type: String,
-        },
-        text: String,
-        user_id: {
-          type: ObjectId,
-          ref: "User",
-        },
-      },
-    ],
+    // comments: [
+    //   {
+    //     time: {
+    //       type: Date,
+    //       default: Date.now(),
+    //     },
+    //     text: String,
+    //     user_id: {
+    //       type: ObjectId,
+    //       ref: "User",
+    //     },
+    //   },
+    // ],
   },
   { timestamps: true }
 );

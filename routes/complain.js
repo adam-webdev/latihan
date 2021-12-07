@@ -21,10 +21,9 @@ router.post("/api/complain", [upload.single("picture"), auth], (req, res) => {
   cloudinary.uploader
     .upload(req.file.path)
     .then((result) => {
-      const { locationDetail, description, status } = req.body;
+      const { locationDetail, description } = req.body;
       const complain = new Complain({
         locationDetail,
-        status,
         description,
         user_id: req.user._id,
         picture: result.secure_url,
@@ -61,9 +60,9 @@ router.put(
   (req, res) => {
     Complain.findById(req.params.id)
       .then((complain) => {
-        cloudinary.uploader.destroy(complain.cloudinary_id);
         //jika ada request file
         if (req.file) {
+          cloudinary.uploader.destroy(complain.cloudinary_id);
           cloudinary.uploader
             .upload(req.file.path)
             .then((result) => {
@@ -72,8 +71,8 @@ router.put(
                   req.body.locationDetail || complain.locationDetail,
                 status: req.body.status || complain.status,
                 description: req.body.description || complain.description,
-                picture: result?.secure_url || complain.picture,
-                cloudinary_id: result?.public_id || complain.cloudinary_id,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
               };
 
               Complain.findByIdAndUpdate(req.params.id, data, {
@@ -91,7 +90,15 @@ router.put(
             });
           // jika tidak ada request file
         } else {
-          Complain.findByIdAndUpdate(req.params.id, req.body, {
+          const oldData = {
+            locationDetail: req.body.locationDetail || complain.locationDetail,
+            status: req.body.status || complain.status,
+            description: req.body.description || complain.description,
+            picture: complain.picture,
+            cloudinary_id: complain.cloudinary_id,
+          };
+
+          Complain.findByIdAndUpdate(req.params.id, oldData, {
             new: true,
           })
             .then((result) => {

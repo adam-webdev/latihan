@@ -60,18 +60,13 @@ const UpdateDirectory = () => {
     };
 
     closeSnackbar();
-    if (!name || !address || !description || !phoneNumber || !picture) {
-      enqueueSnackbar("semua field wajib diisi!", {
-        variant: "warning",
-      });
-      return;
-    }
+
     setLoading(true);
     axios
       .request(options)
       .then((response) => {
         console.log(response.data);
-        enqueueSnackbar("directory berhasil ditambahkan", {
+        enqueueSnackbar("directory berhasil diupdate", {
           variant: "success",
         });
         setLoading(false);

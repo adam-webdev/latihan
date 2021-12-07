@@ -1,12 +1,59 @@
-import React from "react";
-import { ButtonDelete } from "../button/Button";
 import { Table, Thead, Tbody, Tr, Th, Td, Flex } from "@chakra-ui/react";
+import { ButtonDelete } from "../button/Button";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { baseUrl } from "../../context/UserContext";
+import { useSnackbar } from "notistack";
 
 const Field = () => {
-  const handleClick = () => {
-    if (window.confirm("yakin ingin menghapus?")) {
-    }
+  const [field, setField] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  const options = {
+    method: "GET",
+    url: `${baseUrl}/field`,
+    headers: {
+      Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+    },
   };
+  const fetchField = () => {
+    setLoading(true);
+    axios
+      .request(options)
+      .then((response) => {
+        setField(response.data.field);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const handleDelete = (id) => {
+    closeSnackbar();
+    const deleteOptions = {
+      method: "DELETE",
+      url: `${baseUrl}/field/${id}`,
+      headers: {
+        Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
+      },
+    };
+    axios
+      .request(deleteOptions)
+      .then((result) => {
+        enqueueSnackbar("Berhasil dihapus", { variant: "success" });
+        fetchField();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    fetchField();
+  }, []);
+
   return (
     <Table variant="simple" size="md" bg="#fff">
       <Thead>
@@ -22,38 +69,34 @@ const Field = () => {
         <Th>Action</Th>
       </Thead>
       <Tbody>
-        <Tr>
-          <Td>1</Td>
-          <Td>2</Td>
-          <Td>adam maulana</Td>
-          <Td>200 km</Td>
-          <Td>Bandung Jawa Barat</Td>
-          <Td>hamlett</Td>
-          <Td>Bandung</Td>
-          <Td>Asiapp</Td>
-          <Td>Hak Milik</Td>
-          <Td>
-            <Flex>
-              <ButtonDelete onClick={handleClick} title="Delete" />
-            </Flex>
-          </Td>
-        </Tr>
-        <Tr>
-          <Td>1</Td>
-          <Td>2</Td>
-          <Td>adam maulana</Td>
-          <Td>Pecinta Alam</Td>
-          <Td>Mahasiswa</Td>
-          <Td>Rp. 9000000</Td>
-          <Td>200</Td>
-          <Td>Mantap Betul bang keren pokokknya sukses terus dah yaa</Td>
-          <Td>08908907807</Td>
-          <Td>
-            <Flex>
-              <ButtonDelete onClick={handleClick} title="Delete" />
-            </Flex>
-          </Td>
-        </Tr>
+        {loading ? (
+          <Tr>loadingg</Tr>
+        ) : (
+          field?.map((item, index) => (
+            <Tr key={index}>
+              <Td>{index + 1}</Td>
+              <Td>{item.user_id ? item.user_id.name : ""}</Td>
+              <Td>{item.name}</Td>
+              <Td>{item.large}</Td>
+              <Td>{item.address}</Td>
+              <Td>{item.hamlet}</Td>
+              <Td>{item.village}</Td>
+              <Td>{item.district}</Td>
+              <Td>{item.status}</Td>
+              <Td>
+                <Flex>
+                  <ButtonDelete
+                    onClick={() => {
+                      if (window.confirm("yakin ingin menghapus?"))
+                        handleDelete(item._id);
+                    }}
+                    title="Delete"
+                  />
+                </Flex>
+              </Td>
+            </Tr>
+          ))
+        )}
       </Tbody>
     </Table>
   );

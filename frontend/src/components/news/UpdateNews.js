@@ -58,11 +58,7 @@ const UpdateNews = () => {
     };
 
     closeSnackbar();
-    if (!title || !contents || !picture || !writter) {
-      enqueueSnackbar("semua field wajib diisi!", {
-        variant: "warning",
-      });
-    }
+
     setLoading(true);
     axios
       .request(options)

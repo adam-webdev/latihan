@@ -64,52 +64,62 @@ router.get(
 );
 
 //update
-router.put("/api/plantingguide/:id", auth, (req, res) => {
-  Plantingguide.findById(req.params.id)
-    .then((plantingguide) => {
-      cloudinary.uploader.destroy(plantingguide.cloudinary_id);
-      //jika ada request file
-      if (req.file) {
-        cloudinary.uploader
-          .upload(req.file.path)
-          .then((result) => {
-            const data = {
-              title: req.body.title || plantingguide.title,
-              description: req.body.description || plantingguide.description,
-              picture: result?.secure_url || plantingguide.picture,
-              cloudinary_id: result?.public_id || plantingguide.cloudinary_id,
-            };
+router.put(
+  "/api/plantingguide/:id",
+  [upload.single("picture"), auth],
+  (req, res) => {
+    Plantingguide.findById(req.params.id)
+      .then((plantingguide) => {
+        //jika ada request file
+        if (req.file) {
+          cloudinary.uploader.destroy(plantingguide.cloudinary_id);
+          cloudinary.uploader
+            .upload(req.file.path)
+            .then((result) => {
+              const data = {
+                title: req.body.title || plantingguide.title,
+                description: req.body.description || plantingguide.description,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
+              };
 
-            Plantingguide.findByIdAndUpdate(req.params.id, data, {
-              new: true,
-            })
-              .then((result) => {
-                res.json({ message: "Berhasil update", result });
+              Plantingguide.findByIdAndUpdate(req.params.id, data, {
+                new: true,
               })
-              .catch((err) => {
-                res.json({ message: err });
-              });
+                .then((result) => {
+                  res.json({ message: "Berhasil update", result });
+                })
+                .catch((err) => {
+                  res.json({ message: err });
+                });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+          // jika tidak ada request file
+        } else {
+          const oldData = {
+            title: req.body.title || plantingguide.title,
+            description: req.body.description || plantingguide.description,
+            picture: plantingguide.picture,
+            cloudinary_id: plantingguide.cloudinary_id,
+          };
+          Plantingguide.findByIdAndUpdate(req.params.id, oldData, {
+            new: true,
           })
-          .catch((err) => {
-            res.json({ message: err });
-          });
-        // jika tidak ada request file
-      } else {
-        Plantingguide.findByIdAndUpdate(req.params.id, req.body, {
-          new: true,
-        })
-          .then((result) => {
-            res.json({ message: "Berhasil update", result });
-          })
-          .catch((err) => {
-            res.json({ message: err });
-          });
-      }
-    })
-    .catch((err) => {
-      res.json({ message: err });
-    });
-});
+            .then((result) => {
+              res.json({ message: "Berhasil update", result });
+            })
+            .catch((err) => {
+              res.json({ message: err });
+            });
+        }
+      })
+      .catch((err) => {
+        res.json({ message: err });
+      });
+  }
+);
 
 //delete
 router.delete("/api/plantingguide/:id", auth, (req, res) => {

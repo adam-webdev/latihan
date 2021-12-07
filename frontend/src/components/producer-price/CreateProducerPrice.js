@@ -70,6 +70,7 @@ const CreateProducerPrice = () => {
         />
         <Text>Price : </Text>
         <Input
+          type="number"
           variant="filled"
           size="lg"
           placeholder="Price..."

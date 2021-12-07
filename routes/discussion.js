@@ -55,28 +55,38 @@ router.get("/api/discussion/:id", auth, (req, res) => {
   });
 });
 // comment discussion
-router.put("/api/discussion/comment/:id", auth, (req, res) => {
-  const comment = {
-    text: req.body.text,
-    name: req.user.name,
-    user_id: req.user._id,
-  };
-  Discussion.findByIdAndUpdate(
-    req.params.id,
-    { $push: { comments: comment } },
-    { new: true }
-  )
-    .populate("comment.user_id", "_id name")
-    .populate("user_id", "_id name")
-    .exec((err, result) => {
-      if (err) {
-        return res.status(422).json({ error: "error" });
-      } else {
-        res.status(201).json({ message: "berhasil", result });
-      }
-    });
-});
-// delete comment discussion
+// router.put("/api/discussion/comment/:id", auth, (req, res) => {
+//   const comment = {
+//     text: req.body.text,
+//     user_id: req.user._id,
+//   };
+//   Discussion.findByIdAndUpdate(
+//     req.params.id,
+//     { $push: { comments: comment } },
+//     { new: true }
+//   ).exec((err, result) => {
+//     if (err) {
+//       res.status(422).json({ error: "error" });
+//     } else {
+//       res.status(201).json({ message: "berhasil", result });
+//     }
+//   });
+// });
+// // delete comment discussion
+// router.put("/api/discussion/comment/delete/:id", auth, (req, res) => {
+
+//   Discussion.findByIdAndUpdate(
+//     req.params.id,
+//     { $unset: { comments: comments._id } },
+//     { new: true }
+//   ).exec((err, result) => {
+//     if (err) {
+//       return res.status(422).json({ error: "error" });
+//     } else {
+//       res.status(201).json({ message: "berhasil", result });
+//     }
+//   });
+// });
 
 //update
 router.put(
@@ -85,17 +95,17 @@ router.put(
   (req, res) => {
     Discussion.findById(req.params.id)
       .then((discussion) => {
-        cloudinary.uploader.destroy(discussion.cloudinary_id);
         //jika ada request file
         if (req.file) {
+          cloudinary.uploader.destroy(discussion.cloudinary_id);
           cloudinary.uploader
             .upload(req.file.path)
             .then((result) => {
               const data = {
                 title: req.body.title || discussion.title,
                 description: req.body.description || discussion.description,
-                picture: result?.secure_url || discussion.picture,
-                cloudinary_id: result?.public_id || discussion.cloudinary_id,
+                picture: result?.secure_url,
+                cloudinary_id: result?.public_id,
               };
 
               Discussion.findByIdAndUpdate(req.params.id, data, {
@@ -113,7 +123,13 @@ router.put(
             });
           // jika tidak ada request file
         } else {
-          Discussion.findByIdAndUpdate(req.params.id, req.body, {
+          const oldData = {
+            title: req.body.title || discussion.title,
+            description: req.body.description || discussion.description,
+            picture: discussion.picture,
+            cloudinary_id: discussion.cloudinary_id,
+          };
+          Discussion.findByIdAndUpdate(req.params.id, oldData, {
             new: true,
           })
             .then((result) => {

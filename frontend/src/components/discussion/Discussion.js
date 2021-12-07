@@ -71,7 +71,7 @@ const Discussion = () => {
             discussion?.map((item, index) => (
               <Tr key={index}>
                 <Td>{index + 1}</Td>
-                <Td>{item.user_id._id}</Td>
+                <Td>{item.user_id ? item.user_id._id : ""}</Td>
                 <Td>{item.title}</Td>
                 <Td>{item.description}</Td>
                 <Td>
@@ -81,10 +81,7 @@ const Discussion = () => {
                 </Td>
                 <Td>
                   <Flex>
-                    <ButtonComment
-                      link={`/discussion/${item._id}/edit`}
-                      title="Edit"
-                    />
+                    <ButtonComment link={`/comment/${item._id}`} title="Edit" />
                     <ButtonDelete
                       onClick={() => {
                         if (window.confirm("Yakin ingin menghapus ?"))

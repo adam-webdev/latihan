@@ -70,8 +70,8 @@ const Complain = () => {
           complain?.map((item, index) => (
             <Tr key={index}>
               <Td>{index + 1}</Td>
-              <Td>{item.user_id._id}</Td>
-              <Td>{item.user_id.name}</Td>
+              <Td>{item.user_id ? item.user_id._id : <>-</>}</Td>
+              <Td>{item.user_id ? item.user_id.name : <>-</>}</Td>
               <Td>{item.status}</Td>
               <Td>
                 <Flex>

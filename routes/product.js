@@ -63,9 +63,9 @@ router.get("/api/product/:id", auth, (req, res) => {
 router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
   Product.findById(req.params.id)
     .then((product) => {
-      cloudinary.uploader.destroy(product.cloudinary_id);
       //jika ada request file
       if (req.file) {
+        cloudinary.uploader.destroy(product.cloudinary_id);
         cloudinary.uploader
           .upload(req.file.path)
           .then((result) => {
@@ -75,8 +75,8 @@ router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
               commodity: req.body.address || product.address,
               description: req.body.role || product.role,
               stock_kg: req.body.gapoktan || product.gapoktan,
-              picture: result?.secure_url || product.picture,
-              cloudinary_id: result?.public_id || product.cloudinary_id,
+              picture: result?.secure_url,
+              cloudinary_id: result?.public_id,
             };
 
             Product.findByIdAndUpdate(req.params.id, data, { new: true })
@@ -92,7 +92,16 @@ router.put("/api/product/:id", [upload.single("picture"), auth], (req, res) => {
           });
         // jika tidak ada request file
       } else {
-        Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const oldData = {
+          category: req.body.name || product.name,
+          price: req.body.email || product.email,
+          commodity: req.body.address || product.address,
+          description: req.body.role || product.role,
+          stock_kg: req.body.gapoktan || product.gapoktan,
+          picture: product.picture,
+          cloudinary_id: product.cloudinary_id,
+        };
+        Product.findByIdAndUpdate(req.params.id, oldData, { new: true })
           .then((result) => {
             res.json({ message: "Berhasil update", result });
           })

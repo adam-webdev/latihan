@@ -42,7 +42,7 @@ const Home = () => {
           </Link>
           <Link to="/plaint" className="link-home">
             <BiPaperPlane className="icons-home" />
-            <p>Plaint</p>
+            <p>Plant</p>
           </Link>
         </div>
         <div className="row">
@@ -60,9 +60,9 @@ const Home = () => {
             <IoPricetagsOutline className="icons-home" />
             <p>Producer Price</p>
           </Link>
-          <Link to="/planning-guide" className="link-home">
+          <Link to="/planting-guide" className="link-home">
             <MdOutlineVerifiedUser className="icons-home" />
-            <p>Planning Guide</p>
+            <p>Planting Guide</p>
           </Link>
         </div>
         <div className="row">

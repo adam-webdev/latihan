@@ -72,9 +72,9 @@ router.get("/api/plant/:id", auth, (req, res) => {
 router.put("/api/plant/:id", [upload.single("picture"), auth], (req, res) => {
   Plant.findById(req.params.id)
     .then((plant) => {
-      cloudinary.uploader.destroy(plant.cloudinary_id);
       //jika ada request file
       if (req.file) {
+        cloudinary.uploader.destroy(plant.cloudinary_id);
         cloudinary.uploader
           .upload(req.file.path)
           .then((result) => {
@@ -87,8 +87,8 @@ router.put("/api/plant/:id", [upload.single("picture"), auth], (req, res) => {
               startDate: req.body.startDate || plant.startDate,
               estimatedResult:
                 req.body.estimatedResult || plant.estimatedResult,
-              picture: result?.secure_url || plant.picture,
-              cloudinary_id: result?.public_id || plant.cloudinary_id,
+              picture: result?.secure_url,
+              cloudinary_id: result?.public_id,
             };
 
             Plant.findByIdAndUpdate(req.params.id, data, {
@@ -106,7 +106,18 @@ router.put("/api/plant/:id", [upload.single("picture"), auth], (req, res) => {
           });
         // jika tidak ada request file
       } else {
-        Plant.findByIdAndUpdate(req.params.id, req.body, {
+        const oldData = {
+          cultivationMethod:
+            req.body.cultivationMethod || plant.cultivationMethod,
+          field_id: req.body.field_id || plant.field_id,
+          commodity: req.body.commodity || plant.commodity,
+          plantingPhase: req.body.plantingPhase || plant.plantingPhase,
+          startDate: req.body.startDate || plant.startDate,
+          estimatedResult: req.body.estimatedResult || plant.estimatedResult,
+          picture: plant.picture,
+          cloudinary_id: plant.cloudinary_id,
+        };
+        Plant.findByIdAndUpdate(req.params.id, oldData, {
           new: true,
         })
           .then((result) => {

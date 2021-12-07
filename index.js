@@ -1,13 +1,13 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const PORT = 4000;
+const port = process.env.PORT || 4000;
 const { MONGO_URI } = require("./key.js");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
 dotenv.config();
-mongoose.connect(MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -30,6 +30,7 @@ require("./models/complain");
 require("./models/plant");
 require("./models/erdkk");
 require("./models/field");
+require("./models/comments");
 
 app.use(cors());
 app.use(express.json());
@@ -46,8 +47,9 @@ app.use(require("./routes/complain"));
 app.use(require("./routes/plant"));
 app.use(require("./routes/erdkk"));
 app.use(require("./routes/field"));
+app.use(require("./routes/comments"));
 // app.use(require("./routes/post"));
 
-app.listen(PORT, () => {
-  console.log("Server is Running:", PORT);
+app.listen(port, () => {
+  console.log("Server is Running:", port);
 });

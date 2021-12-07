@@ -75,14 +75,14 @@ const Product = () => {
           product.map((product, index) => (
             <Tr key={index}>
               <Td>{index + 1}</Td>
-              <Td>{product.user_id._id.substr(0, 5)}</Td>
-              <Td>{product.user_id.name}</Td>
+              <Td>{product.user_id ? product.user_id._id.substr(0, 5) : ""}</Td>
+              <Td>{product.user_id ? product.user_id.name : ""}</Td>
               <Td>{product.commodity}</Td>
               <Td>{product.category}</Td>
               <Td>{product.price}</Td>
               <Td>{product.stock_kg}</Td>
               <Td>{product.description}</Td>
-              <Td>{product.user_id.phoneNumber}</Td>
+              <Td>{product.user_id ? product.user_id.phoneNumber : ""}</Td>
               <Td>
                 <img src={product.picture} alt="product " width="100px" />
               </Td>

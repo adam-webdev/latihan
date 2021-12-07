@@ -27,7 +27,6 @@ router.post("/api/erdkk", auth, (req, res) => {
     birthPlace,
     birthDate,
     motherName,
-    status,
     distributorCode,
   } = req.body;
   if (
@@ -40,8 +39,7 @@ router.post("/api/erdkk", auth, (req, res) => {
     !birthPlace ||
     !motherName ||
     !birthDate ||
-    !distributorCode ||
-    !status
+    !distributorCode
   ) {
     res.status(404).json({ message: "semua input harus diisi" });
   }
@@ -56,7 +54,6 @@ router.post("/api/erdkk", auth, (req, res) => {
     birthPlace,
     birthDate,
     motherName,
-    status,
     distributorCode,
   });
 
